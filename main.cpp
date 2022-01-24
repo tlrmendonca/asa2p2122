@@ -6,22 +6,46 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    int problem;
-    vector<int> sequence1, sequence2;
+    // General problem information
+    int V, E, v1, v2;
 
     // Data input
-    // char *seq = NULL;
-    // if (scanf("%i\n%m[^\n]%*c", &problem, &seq) != 2)
-    //     cout << "Debug: fscanf" << endl;
-    // sequence1 = to_vector(seq);
+    if (scanf("%d %d\n%d %d", &v1, &v2, &V, &E) != 4)
+        cout << "Debug: scanf failed" << endl;
 
-    // if (problem == 2)
+    // Debug
+    // cout << v1 << " "  << v2 << "\n"  << V << " " << E << endl;
+
+    // Graph structure
+    // Vector or vectors (vertices that have a "list" of edges)
+    // Rule : input as v-1 and output as v+1
+    vector<vector<int>> G(V);
+
+    int v, u;
+    while (scanf("%d %d", &v, &u) == 2) {
+        //Rule
+        v = v-1;
+        u = u-1;
+        cout << v << " " << u << endl;
+        G[v].push_back(u);
+    }
+
+    cout << "Size 0: "<< G[0].size() << endl;
+    cout << "Size 1: "<< G[1].size() << endl;
+    for (int i = 0; i < 2; i++)
+        cout << G[0][i] << endl;
+    cout << G[0][1] << endl;
+    
+
+    // Debug
+    // for (int i = 0; i < V; i++)
     // {
-    //     int temp;
-    //     while (scanf("%d", &temp) == 1)
-    //         sequence2.push_back(temp);
+    //     cout <<"Vertice: " << i << "Size: " <<G[v].size() << endl;
+    //     for (int j = 0; j < (int)G[v].size(); j++)
+    //     {
+    //         cout << i + 1 << "->" << j + 1 << endl;
+    //     }
     // }
 
-    // Solution
     return 0;
 }
