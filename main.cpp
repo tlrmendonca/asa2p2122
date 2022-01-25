@@ -1,6 +1,4 @@
 #include <iostream>
-#include <string.h>
-#include <sstream>
 #include <vector>
 using namespace std;
 
@@ -45,9 +43,69 @@ bool isFamilyTree(vector<vector<int>> G, int V, int E)
     for (int i = 0; i < V; i++)
         if (hasCycle(G, i, visited, stack))
             return false;
-    
+
     // Reaches here if there no loops are detected
     return true;
+}
+
+void DFS(vector<vector<int>> G, int V, int s, bool *visited)
+{
+    visited[s] = true;
+
+    // Call for all connected nodes
+    for (int i = 0; i < (int)G[s].size(); ++i)
+        if (!visited[G[s][i]])
+            DFS(G, V, G[s][i], visited);
+
+    return;
+}
+
+bool hasGreenDescendants(vector<vector<int>> G, bool *yellow, bool *blue, int v)
+{
+    for (int i = 0; i < (int)G[v].size(); i++)
+    {
+        if (yellow[G[v][i]] && blue[G[v][i]])
+            return true;
+    }
+    return false;
+}
+
+void LCA(vector<vector<int>> G, int V, int E, int v1, int v2)
+{
+    // Invert Graph
+    vector<vector<int>> invertedGraph(V);
+
+    for (int i = 0; i < V; i++)
+        for (int j = 0; j < (int)G[i].size(); j++)
+            invertedGraph[G[i][j]].push_back(i);
+
+    // DFS starting at v1
+    // will give us every ancestor os v1
+    bool yellow[V] = {false};
+    DFS(invertedGraph, V, v1, yellow);
+
+    // DFS starting at v2
+    // will give us every ancestor os v2
+    bool blue[V] = {false};
+    DFS(invertedGraph, V, v2, blue);
+
+    // If Yellow and Blue => Common Ancestor
+    // If a Green node doesn't have Green descendants, then its the lowest possible
+    bool empty = true;
+    for (int i = 0; i < V; i++)
+    {
+        if (yellow[i] && blue[i] && !hasGreenDescendants(G, yellow, blue, i))
+        {
+            // !
+            cout << i + 1 << " ";
+            empty = false;
+        }
+    }
+    if (empty)
+        // !
+        cout << "-";
+    // !
+    cout << endl;
 }
 
 int main(int argc, char *argv[])
@@ -59,8 +117,9 @@ int main(int argc, char *argv[])
     if (scanf("%d %d\n%d %d", &v1, &v2, &V, &E) != 4)
         cout << "Debug: scanf failed" << endl;
 
-    // Debug
-    // cout << v1 << " "  << v2 << "\n"  << V << " " << E << endl;
+    // Rule (explained in Graph Structure)
+    v1 = v1 - 1;
+    v2 = v2 - 1;
 
     // Graph structure
     // Vector or vectors (vertices that have a "list" of edges)
@@ -79,18 +138,7 @@ int main(int argc, char *argv[])
         G[v].push_back(u);
     }
 
-    // Debug
-    // for (int i = 0; i < V; i++)
-    // {
-    //     cout << i + 1 << ":";
-    //     for (int j = 0; j < (int)G[i].size(); j++)
-    //     {
-    //         cout << " ->" << G[i][j] + 1;
-    //     }
-    //     cout << endl;
-    // }
-
-    // ?? 
+    // ??
     // ?? Is this a valid family tree ?
     // ??
 
@@ -112,14 +160,11 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    // Debug
-    // cout << "Was a family tree!" << endl;
-
     // ?
     // ? LCA - Lowest Common Ancestor
     // ?
 
-    LCA(V, E, G, v1, v2);
+    LCA(G, V, E, v1, v2);
 
     return 0;
 }
