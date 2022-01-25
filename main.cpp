@@ -114,5 +114,12 @@ int main(int argc, char *argv[])
 
     // Debug
     // cout << "Was a family tree!" << endl;
+
+    // ?
+    // ? LCA - Lowest Common Ancestor
+    // ?
+
+    LCA(V, E, G, v1, v2);
+
     return 0;
 }
