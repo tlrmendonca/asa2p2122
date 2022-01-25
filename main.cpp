@@ -1,4 +1,5 @@
 #include <iostream>
+#include <queue>
 #include <vector>
 using namespace std;
 
@@ -48,18 +49,6 @@ bool isFamilyTree(vector<vector<int>> G, int V, int E)
     return true;
 }
 
-void DFS(vector<vector<int>> G, int V, int s, bool *visited)
-{
-    visited[s] = true;
-
-    // Call for all connected nodes
-    for (int i = 0; i < (int)G[s].size(); ++i)
-        if (!visited[G[s][i]])
-            DFS(G, V, G[s][i], visited);
-
-    return;
-}
-
 bool hasGreenDescendants(vector<vector<int>> G, bool *yellow, bool *blue, int v)
 {
     for (int i = 0; i < (int)G[v].size(); i++)
@@ -82,12 +71,40 @@ void LCA(vector<vector<int>> G, int V, int E, int v1, int v2)
     // DFS starting at v1
     // will give us every ancestor os v1
     bool yellow[V] = {false};
-    DFS(invertedGraph, V, v1, yellow);
+    queue<int> yellowQ;
+    yellowQ.push(v1);
+    while (!yellowQ.empty())
+    {
+        // Take first and remove it
+        int current = yellowQ.front();
+        yellowQ.pop();
+
+        // Paint current
+        yellow[current] = true;
+
+        // Add parents to queue
+        for (int i = 0; i < (int)invertedGraph[current].size(); i++)
+            yellowQ.push(invertedGraph[current][i]);
+    }
 
     // DFS starting at v2
     // will give us every ancestor os v2
     bool blue[V] = {false};
-    DFS(invertedGraph, V, v2, blue);
+    queue<int> blueQ;
+    blueQ.push(v2);
+    while (!blueQ.empty())
+    {
+        // Take first and remove it
+        int current = blueQ.front();
+        blueQ.pop();
+
+        // Paint current
+        blue[current] = true;
+
+        // Add parents to queue
+        for (int i = 0; i < (int)invertedGraph[current].size(); i++)
+            blueQ.push(invertedGraph[current][i]);
+    }
 
     // If Yellow and Blue => Common Ancestor
     // If a Green node doesn't have Green descendants, then its the lowest possible
