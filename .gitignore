@@ -31,5 +31,8 @@
 *.out
 *.app
 
-# Teste files
+# Test files
 *.txt
+
+# Generator exe
+randGeneoTree

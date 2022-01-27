@@ -3,7 +3,7 @@
 #include <vector>
 using namespace std;
 
-bool hasCycle(vector<vector<int>> G, int v, bool visited[], bool stack[])
+bool hasCycle(vector<vector<int>> &G, int v, vector<bool> &visited, vector<bool> &stack)
 {
     if (visited[v] == false)
     {
@@ -30,10 +30,11 @@ bool hasCycle(vector<vector<int>> G, int v, bool visited[], bool stack[])
     return false;
 }
 
-bool isFamilyTree(vector<vector<int>> G, int V, int E)
+bool isFamilyTree(vector<vector<int>> &G, int V, int E)
 {
     // Initialize Single Source
-    bool visited[V], stack[V];
+    vector<bool> visited(V);
+    vector<bool> stack(V);
     for (int i = 0; i < V; i++)
     {
         visited[i] = false;
@@ -49,28 +50,15 @@ bool isFamilyTree(vector<vector<int>> G, int V, int E)
     return true;
 }
 
-bool hasGreenDescendants(vector<vector<int>> G, bool *yellow, bool *blue, int v)
+void LCA(vector<vector<int>> &G, vector<vector<int>> &invertedGraph, int V, int E, int v1, int v2)
 {
-    for (int i = 0; i < (int)G[v].size(); i++)
-    {
-        if (yellow[G[v][i]] && blue[G[v][i]])
-            return true;
-    }
-    return false;
-}
-
-void LCA(vector<vector<int>> G, int V, int E, int v1, int v2)
-{
-    // Invert Graph
-    vector<vector<int>> invertedGraph(V);
-
+    // Yellow Paint
+    vector<bool> yellow;
     for (int i = 0; i < V; i++)
-        for (int j = 0; j < (int)G[i].size(); j++)
-            invertedGraph[G[i][j]].push_back(i);
+        yellow.push_back(false);
 
     // DFS starting at v1
-    // will give us every ancestor os v1
-    bool yellow[V] = {false};
+    // will give us every ancestor of v1
     queue<int> yellowQ;
     yellowQ.push(v1);
     while (!yellowQ.empty())
@@ -87,9 +75,13 @@ void LCA(vector<vector<int>> G, int V, int E, int v1, int v2)
             yellowQ.push(invertedGraph[current][i]);
     }
 
+    // Blue paint -> blue + yellow = green
+    vector<bool> green;
+    for (int i = 0; i < V; i++)
+        green.push_back(false);
+
     // DFS starting at v2
-    // will give us every ancestor os v2
-    bool blue[V] = {false};
+    // will give us every ancestor of v2
     queue<int> blueQ;
     blueQ.push(v2);
     while (!blueQ.empty())
@@ -98,24 +90,37 @@ void LCA(vector<vector<int>> G, int V, int E, int v1, int v2)
         int current = blueQ.front();
         blueQ.pop();
 
-        // Paint current
-        blue[current] = true;
+        // Paint current if yellow was painted
+        if (yellow[current])
+            green[current] = true;
 
         // Add parents to queue
         for (int i = 0; i < (int)invertedGraph[current].size(); i++)
             blueQ.push(invertedGraph[current][i]);
     }
 
-    // If Yellow and Blue => Common Ancestor
+    // If Green => Common Ancestor
     // If a Green node doesn't have Green descendants, then its the lowest possible
     bool empty = true;
+    bool isLeaf = true;
     for (int i = 0; i < V; i++)
     {
-        if (yellow[i] && blue[i] && !hasGreenDescendants(G, yellow, blue, i))
+        if (green[i])
         {
-            // !
-            cout << i + 1 << " ";
-            empty = false;
+            // Assume its the LCA.
+            // If any of its edges (direct successors) is green, then it can't be a LCA 
+            isLeaf = true;
+            for (int j = 0; j < (int)G[i].size(); j++)
+            {
+                if (green[G[i][j]])
+                    isLeaf = false;
+            }
+            if (isLeaf)
+            {
+                // !
+                cout << i + 1 << " ";
+                empty = false;
+            }
         }
     }
     if (empty)
@@ -142,9 +147,14 @@ int main(int argc, char *argv[])
     // Vector or vectors (vertices that have a "list" of edges)
     // Rule : input as v-1 and output as v+1
     vector<vector<int>> G(V);
+    // Inverted Graph will be useful later
+    vector<vector<int>> invG(V);
 
     int v, u;
-    int ctr[V] = {0};
+    vector<int> ctr;
+    for (int i = 0; i < V; i++)
+        ctr.push_back(0);
+
     while (scanf("%d %d", &v, &u) == 2)
     {
         // Rule
@@ -153,6 +163,7 @@ int main(int argc, char *argv[])
 
         ctr[u] += 1;
         G[v].push_back(u);
+        invG[u].push_back(v);
     }
 
     // ??
@@ -181,7 +192,7 @@ int main(int argc, char *argv[])
     // ? LCA - Lowest Common Ancestor
     // ?
 
-    LCA(G, V, E, v1, v2);
+    LCA(G, invG, V, E, v1, v2);
 
     return 0;
 }
